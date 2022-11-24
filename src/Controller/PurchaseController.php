@@ -67,8 +67,8 @@ class PurchaseController extends AbstractController
         ]);
     }
 
-    #[Route('/paymentSuccess', name: 'payment_success')]
-    public function paymentSucess(SessionInterface $session): Response
+    #[Route('/paymentSuccess/{id<[0-9]+>}', name: 'payment_success')]
+    public function paymentSucess(Purchase $purchase, SessionInterface $session, EntityManagerInterface $em): Response
     {
         if($this->checkRequirement($session, true)) {
             $routeName = $this->checkRequirement($session);
@@ -76,8 +76,17 @@ class PurchaseController extends AbstractController
             return $this->redirectToRoute($routeName);
         }
 
+        $purchase->setStatus(Purchase::STATUS_PAID);
+        $em->flush();
 
-        dd('payement réussi');
+        $session->remove('cart');
+        $session->remove('purchase');
+
+//        TO DO
+//        $mail->sendMail();
+
+        $this->addFlash('success', 'Votre commande a été payé avec succès. Consultez votre mail de confirmation.');
+        return $this->redirectToRoute('home');
     }
 
     private function checkRequirement(SessionInterface $session, $checkPurchase = false)

@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Purchase
 {
     public const STATUS_WAITING = "En attente";
-    public const STATUS_IN_PROGRESS = "En cours";
+    public const STATUS_PAID = "Payé";
     public const STATUS_DONE = "Terminée";
 
     #[ORM\Id]

@@ -24,7 +24,7 @@
    <script>
       const clientSecret = '{{ clientSecret }}';
       const stripe = Stripe('{{ publicKey }}');
-      const urlPayementSucess = '{{ url('payment_success') }}';
+      const urlPayementSucess = '{{ url('payment_success', {'id': purchase.id }) }}';
    </script>
    <script src="/js/stripe.js"></script>
 
