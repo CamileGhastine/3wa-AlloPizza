@@ -7,17 +7,17 @@
     </tr>
     </thead>
     <tbody>
-    {% for product in cart.order %}
+    {% for item in cart.order %}
         <tr class="table-active">
-            <td>{{ product.product.name }}</td>
+            <td>{{ item.product.name }}</td>
             <td>
-                <a href="{{ path('sub_cart', {'id' : product.product.id}) }}"><span class="badge bg-success">-</span></a>
-                <span class="badge bg-secondary">{{ product.quantity }}</span>
-                <a href="{{ path('add_cart', {'id' : product.product.id}) }}"><span class="badge bg-success">+</span></a>
-                <a href="{{ path('remove_item', {'id' : product.product.id}) }}"><span class="badge bg-danger">🗑️</span></a>
+                <a href="#"><span class="badge bg-success product-btn" id="sub-{{ item.product.id }}">-</span></a>
+                <span class="badge bg-secondary">{{ item.quantity }}</span>
+                <a href="#"><span class="badge bg-success product-btn" id="add-{{ item.product.id }}">+</span></a>
+                <a href="#}"><span class="badge bg-danger product-btn" id="removeItem-{{ item.product.id }}">🗑️</span></a>
             </td>
             <td>
-                {{ product.product.price * product.quantity /100 }} €
+                {{ item.product.price * item.quantity /100 }} €
             </td>
 
         </tr>

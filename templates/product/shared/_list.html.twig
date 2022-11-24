@@ -10,9 +10,9 @@
                 {% endfor %}
             </div>
             <div class="card-footer">
-                <a href="{{ path('sub_cart', {'id' : product.id}) }}"><span class="badge bg-success">-</span></a>
-                <span class="badge bg-secondary">{{ quantity }}</span>
-                <a href="{{ path('add_cart', {'id' : product.id}) }}"><span class="badge bg-success">+</span></a>
+                <a href="#"><span class="badge bg-success product-btn" id="sub-{{ product.id }}">-</span></a>
+                <span class="badge bg-secondary" id="product-qty-{{ product.id }}">{{ quantity }}</span>
+                <a href="#"><span class="badge bg-success product-btn" id="add-{{ product.id }}">+</span></a>
                 <div class="card-header">{{ product.price /100 }} €</div>
             </div>
         </div>

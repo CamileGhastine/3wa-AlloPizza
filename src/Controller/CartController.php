@@ -67,4 +67,17 @@ class CartController extends AbstractController
 
         return $this->redirectToRoute('order');
     }
+
+    #[Route('ajax', name: 'ajax')]
+    public function ajax(Request $request, CartHandler $cartHandler)
+    {
+        $id = $request->request->get('id');
+        $action = $request->request->get('action');
+
+        $cartHandler->$action($id);
+
+        return $this->render('product/shared/_cart.html.twig', [
+            'cart' => $cartHandler->getCart()
+        ]);
+    }
 }
