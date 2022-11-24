@@ -62,11 +62,28 @@ class PurchaseController extends AbstractController
             return $this->redirectToRoute('purchase');
         }
 
+        \Stripe\Stripe::setApiKey('sk_test_51M3hC4KOvMqC5i9eIxaszMTpxRv4QlrlA8hat5Fx9FYcSeWEHwB4m0QVw5aDRtKCbZyQCJncpluRTBh9JpxMBhOk00q1mQ4yUr');
+
+        // Create a PaymentIntent with amount and currency
+        $paymentIntent = \Stripe\PaymentIntent::create([
+            'amount' => $session->get('purchase')->getAmount(),
+            'currency' => 'eur',
+            'automatic_payment_methods' => [
+                'enabled' => true,
+            ],
+        ]);
+
         return $this->render('purchase/payment.html.twig', [
             'cart' => $cartHandler->getCart(),
-            'purchase' => $session->get('purchase')
-
+            'purchase' => $session->get('purchase'),
+            'clientSecret' => $paymentIntent->client_secret
         ]);
+    }
+
+    #[Route('/paymentSuccess', name: 'payment_success')]
+    public function paymentSucess(): Response
+    {
+        dd('payement réussi');
     }
 
     private function checkRequirement(SessionInterface $session)
