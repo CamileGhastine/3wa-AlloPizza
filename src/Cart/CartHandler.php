@@ -2,6 +2,7 @@
 
 namespace App\Cart;
 
+use App\Entity\PurchaseItem;
 use App\Repository\ProductRepository;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -70,10 +71,14 @@ class CartHandler
         foreach ($this->session->get('cart', []) as $id => $quantity) {
             $product = $this->productRepository->find($id);
 
-            $order[$id] = [
-                'product' => $product,
-                'quantity' => $quantity
-            ];
+            $purchaseItem = new PurchaseItem();
+            $purchaseItem->setProduct($product)
+                ->setQuantity($quantity)
+                ->setProductName($product->getName())
+                ->setProductPrice($product->getPrice())
+            ;
+
+            $order[$id] = $purchaseItem ;
 
             $total += $product->getPrice() * $quantity;
         }

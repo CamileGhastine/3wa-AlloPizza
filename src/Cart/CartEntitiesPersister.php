@@ -13,14 +13,8 @@ class CartEntitiesPersister
     public function persist(Purchase $purchase)
     {
         $this->em->persist($purchase);
-        foreach($this->cartHandler->getCart()->getOrder() as $item) {
-            $purchaseItem = new PurchaseItem();
-            $purchaseItem->setProduct($item['product'])
-                ->setQuantity($item['quantity'])
-                ->setProductName($item['product']->getName())
-                ->setProductPrice($item['product']->getPrice())
-                ->setPurchase($purchase)
-            ;
+        foreach($this->cartHandler->getCart()->getOrder() as $purchaseItem) {
+            $purchaseItem->setPurchase($purchase);
             $this->em->persist($purchaseItem);
         }
         $this->em->flush();
