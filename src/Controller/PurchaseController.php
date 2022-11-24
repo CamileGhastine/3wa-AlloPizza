@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Cart\CartEntitiesPersister;
 use App\Cart\CartHandler;
 use App\Entity\Purchase;
 use App\Entity\PurchaseItem;
@@ -16,24 +17,16 @@ use Symfony\Component\Routing\Annotation\Route;
 class PurchaseController extends AbstractController
 {
     #[Route('/purchase', name: 'purchase')]
-    public function index(CartHandler $cartHandler, Request $request, SessionInterface $session, EntityManagerInterface $em): Response
+    public function index(CartHandler $cartHandler, Request $request, SessionInterface $session, CartEntitiesPersister $persister): Response
     {
-        if(!$this->getUser()) {
-            $this->addFlash('danger', "Vous devez vous connecter pour commander.");
+        if($this->checkRequirement($session)) {
+            $routeName = $this->checkRequirement($session);
 
-            return $this->redirectToRoute('app_login');
+            return $this->redirectToRoute($routeName);
         }
-
-        if(!$session->get('cart')) {
-            $this->addFlash('danger', "Votre panier est vide");
-
-            return $this->redirectToRoute('order');
-        }
-
-        $cart = $cartHandler->getCart();
 
         $purchase = new Purchase($this->getUser());
-        $purchase->setAmount($cart->getTotal());
+        $purchase->setAmount($cartHandler->getCart()->getTotal());
 
         $purchaseForm = $this->createForm(PurchaseType::class, $purchase);
 
@@ -41,18 +34,7 @@ class PurchaseController extends AbstractController
 
         if ($purchaseForm->isSubmitted() && $purchaseForm->isValid()) {
 
-            $em->persist($purchase);
-            foreach($cart->getOrder() as $item) {
-                $purchaseItem = new PurchaseItem();
-                $purchaseItem->setProduct($item['product'])
-                    ->setQuantity($item['quantity'])
-                    ->setProductName($item['product']->getName())
-                    ->setProductPrice($item['product']->getPrice())
-                    ->setPurchase($purchase)
-                ;
-                $em->persist($purchaseItem);
-            }
-            $em->flush();
+            $persister->persist($purchase);
 
             $session->set('purchase', $purchase);
 
@@ -60,7 +42,7 @@ class PurchaseController extends AbstractController
         }
 
         return $this->render('purchase/index.html.twig', [
-            'cart' => $cart,
+            'cart' => $cartHandler->getCart(),
             'purchaseForm' => $purchaseForm->createView()
         ]);
     }
@@ -68,14 +50,10 @@ class PurchaseController extends AbstractController
     #[Route('/purchaseConfirmation', name: 'purchase_confirmation')]
     public function purchaseConfirmation(SessionInterface $session, CartHandler $cartHandler): Response
     {
-        if(!$this->getUser()) {
-            return $this->redirectToRoute('app_login');
-        }
+        if($this->checkRequirement($session)) {
+            $routeName = $this->checkRequirement($session);
 
-        if(!$session->get('cart')) {
-            $this->addFlash('danger', "Votre panier est vide");
-
-            return $this->redirectToRoute('order');
+            return $this->redirectToRoute($routeName);
         }
 
         if(!$session->get('purchase')) {
@@ -89,5 +67,22 @@ class PurchaseController extends AbstractController
             'purchase' => $session->get('purchase')
 
         ]);
+    }
+
+    private function checkRequirement(SessionInterface $session)
+    {
+        if(!$this->getUser()) {
+            $this->addFlash('danger', "Vous devez vous connecter pour commander.");
+
+            return 'app_login';
+        }
+
+        if(!$session->get('cart')) {
+            $this->addFlash('danger', "Votre panier est vide");
+
+            return 'order';
+        }
+
+        return false;
     }
 }
