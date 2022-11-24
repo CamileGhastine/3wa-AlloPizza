@@ -9,4 +9,24 @@
    {% include('purchase/shared/_purchase_infos.html.twig') %}
    <h1>Payement</h1>
 
+   <form id="payment-form">
+      <div id="payment-element">
+         <!--Stripe.js injects the Payment Element-->
+      </div>
+      <button id="submit" class="btn btn-success">
+         <div class="spinner hidden" id="spinner"></div>
+         <span id="button-text">Pay now</span>
+      </button>
+      <div id="payment-message" class="hidden"></div>
+   </form>
+
+   <script src="https://js.stripe.com/v3/"></script>
+   <script>
+      const clientSecret = '{{ clientSecret }}';
+      const stripe = Stripe('{{ publicKey }}');
+      const urlPayementSucess = '{{ url('payment_success', {'id': purchase.id }) }}';
+   </script>
+   <script src="/js/stripe.js"></script>
+
+
 {% endblock %}

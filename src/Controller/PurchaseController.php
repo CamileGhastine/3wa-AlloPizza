@@ -7,6 +7,7 @@ use App\Cart\CartHandler;
 use App\Entity\Purchase;
 use App\Entity\PurchaseItem;
 use App\Form\PurchaseType;
+use App\Stripe\StripeHandler;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -48,28 +49,47 @@ class PurchaseController extends AbstractController
     }
 
     #[Route('/purchaseConfirmation', name: 'purchase_confirmation')]
-    public function purchaseConfirmation(SessionInterface $session, CartHandler $cartHandler): Response
+    public function purchaseConfirmation(SessionInterface $session, CartHandler $cartHandler, StripeHandler $stripe): Response
     {
-        if($this->checkRequirement($session)) {
+        if($this->checkRequirement($session, true)) {
             $routeName = $this->checkRequirement($session);
 
             return $this->redirectToRoute($routeName);
         }
 
-        if(!$session->get('purchase')) {
-            $this->addFlash('danger', "Vous devez remplir les informations de livraison");
-
-            return $this->redirectToRoute('purchase');
-        }
+        $paymentIntent = $stripe->createPaymentIntent($session->get('purchase'));
 
         return $this->render('purchase/payment.html.twig', [
             'cart' => $cartHandler->getCart(),
-            'purchase' => $session->get('purchase')
-
+            'purchase' => $session->get('purchase'),
+            'clientSecret' => $paymentIntent->client_secret,
+            'publicKey' => $stripe->getStripePublic()
         ]);
     }
 
-    private function checkRequirement(SessionInterface $session)
+    #[Route('/paymentSuccess/{id<[0-9]+>}', name: 'payment_success')]
+    public function paymentSucess(Purchase $purchase, SessionInterface $session, EntityManagerInterface $em): Response
+    {
+        if($this->checkRequirement($session, true)) {
+            $routeName = $this->checkRequirement($session);
+
+            return $this->redirectToRoute($routeName);
+        }
+
+        $purchase->setStatus(Purchase::STATUS_PAID);
+        $em->flush();
+
+        $session->remove('cart');
+        $session->remove('purchase');
+
+//        TO DO
+//        $mail->sendMail();
+
+        $this->addFlash('success', 'Votre commande a été payé avec succès. Consultez votre mail de confirmation.');
+        return $this->redirectToRoute('home');
+    }
+
+    private function checkRequirement(SessionInterface $session, $checkPurchase = false)
     {
         if(!$this->getUser()) {
             $this->addFlash('danger', "Vous devez vous connecter pour commander.");
@@ -81,6 +101,12 @@ class PurchaseController extends AbstractController
             $this->addFlash('danger', "Votre panier est vide");
 
             return 'order';
+        }
+
+        if(!$session->get('purchase') && $checkPurchase) {
+            $this->addFlash('danger', "Vous devez remplir les informations de livraison");
+
+            return $this->redirectToRoute('purchase');
         }
 
         return false;
