@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello PurchaseController!{% endblock %}
+
+{% block body %}
+    <h3>Votre commande</h3>
+    {% include('purchase/shared/_cart_detail.html.twig') %}
+    <h1>Information de livraison</h1>
+    {% include('purchase/shared/_purchase_form.html.twig') %}
+{% endblock %}

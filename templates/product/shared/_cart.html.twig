@@ -1,0 +1,14 @@
+<div class="card text-white bg-secondary mb-3">
+    <div class="card-header">Commande</div>
+    <div class="card-body">
+        <div class="card-body">
+            {% if not cart.total %}
+                <p>Aucun produit au panier</p>
+            {% else %}
+                {% include('purchase/shared/_cart_detail.html.twig') %}
+                <a href="{{path('purchase')}}" type="button" class="btn btn-success">Commander</a>
+                <p><a href="{{ path('remove_cart') }}">Vider le panier</a></p>
+            {% endif %}
+        </div>
+    </div>
+</div>
