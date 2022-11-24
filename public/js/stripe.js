@@ -1,7 +1,3 @@
-alert('test');
-// This is your test publishable API key.
-const stripe = Stripe("pk_test_51M3hC4KOvMqC5i9eVOqo7i22yujpoF0GhrWYsrd1Hp4mkEsKqudDuFIwStTjwmPts0bZGqc68mjvGara0C7XB1q700ayrvNDzq");
-
 // The items the customer wants to buy
 const items = [{ id: "xl-tshirt" }];
 
@@ -16,11 +12,11 @@ document
 
 // Fetches a payment intent and captures the client secret
 async function initialize() {
-    const { clientSecret } = await fetch("/create.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items }),
-    }).then((r) => r.json());
+    // const { clientSecret } = await fetch("/create.php", {
+    //    method: "POST",
+    //    headers: { "Content-Type": "application/json" },
+    //    body: JSON.stringify({ items }),
+    // }).then((r) => r.json());
 
     elements = stripe.elements({ clientSecret });
 
@@ -40,7 +36,7 @@ async function handleSubmit(e) {
         elements,
         confirmParams: {
             // Make sure to change this to your payment completion page
-            return_url: "http://localhost:4242/public/checkout.html",
+            return_url: urlPayementSucess,
         },
     });
 
